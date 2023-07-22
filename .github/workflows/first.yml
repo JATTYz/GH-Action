@@ -1,6 +1,9 @@
-name: first
+name: First
 
-on: push
+on: 
+   push:
+    branches:
+        - main
 
 jobs:
     job1:
