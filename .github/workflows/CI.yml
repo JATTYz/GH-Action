@@ -1,0 +1,28 @@
+name: Python Pipeline
+
+on: 
+    push:
+        branches:
+            - CI
+
+jobs:
+
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v3
+            - name: Run python
+              run: python3 ./Python/hello.py
+    
+    build: 
+        needs: [test]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v3
+            - name: build artifact 
+              uses: actions/upload-artifact@v3.1.2
+              with:
+                name: Hello
+                path: ./Python  
