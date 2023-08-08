@@ -1,9 +1,12 @@
 name: Docker
 
 on:
+  workflow_dispatch:
   push:
     branches: [ container ]
     tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ container ]
 
 env:
   REGISTRY: ghcr.io
@@ -29,6 +32,8 @@ jobs:
         with:
           cosign-release: 'v1.4.0'
 
+
+    
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
 
@@ -41,12 +46,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+     
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -61,9 +68,10 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
-  Test:
+
+  test:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: test
-        run: docker run ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:container
+        run: docker run ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main | grep container && echo "TEST PASSED"
